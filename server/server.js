@@ -4,10 +4,15 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 import { connectDB } from './config/db.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { startReminderScheduler } from './jobs/reminderScheduler.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Route imports
 import authRoutes from './routes/authRoutes.js';
@@ -28,7 +33,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Security & Middlewares
-app.use(helmet());
+app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
 app.use(
   cors({
     origin: process.env.CLIENT_URL || 'http://localhost:5173',
@@ -79,6 +84,17 @@ app.use('/api/tasks', taskRoutes);
 
 // Centralized Error Handling Middleware
 app.use(errorHandler);
+
+// Serve Frontend client build in production
+const clientDistPath = path.join(__dirname, '../client/dist');
+app.use(express.static(clientDistPath));
+
+app.get('*', (req, res) => {
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({ success: false, message: 'API endpoint not found' });
+  }
+  res.sendFile(path.join(clientDistPath, 'index.html'));
+});
 
 // Start Server & Connect Database
 const startServer = async () => {
