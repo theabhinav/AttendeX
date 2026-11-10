@@ -1,0 +1,14 @@
+{
+  "name": "attendx",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AttendX – AI-Powered Smart Attendance Management Platform",
+  "scripts": {
+    "dev": "node run-dev.js",
+    "server": "npm --prefix server run dev",
+    "client": "npm --prefix client run dev",
+    "seed": "npm --prefix server run seed",
+    "test": "npm --prefix server run test",
+    "build": "npm --prefix client run build"
+  }
+}
